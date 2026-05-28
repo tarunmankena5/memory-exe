@@ -1,0 +1,669 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;700&family=VT323&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0c0a08;font-family:'VT323',monospace;min-height:100vh;overflow-x:hidden}
+
+.app{background:#0c0a08;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;position:relative}
+
+.scanlines{pointer-events:none;position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.07) 3px,rgba(0,0,0,0.07) 4px);z-index:9999;mix-blend-mode:multiply}
+
+.grain{pointer-events:none;position:fixed;top:0;left:0;width:100%;height:100%;opacity:.04;z-index:9998;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+
+.stars-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw 3s infinite alternate}
+@keyframes tw{0%{opacity:.15}100%{opacity:.9}}
+
+/* SCREENS */
+.screen{display:none;width:100%;max-width:400px;flex-direction:column;align-items:center;position:relative;z-index:1}
+.screen.active{display:flex}
+
+/* ---- LOADING ---- */
+#s-load{text-align:center;gap:1.2rem}
+.load-title{font-family:'Silkscreen',monospace;font-size:2rem;color:#e8d5a3;letter-spacing:3px;text-shadow:0 0 30px rgba(232,213,163,0.4)}
+.load-sub{font-family:'Pixelify Sans',monospace;font-size:.85rem;color:#8b7355;letter-spacing:4px}
+.load-bar-wrap{width:260px;height:12px;border:2px solid #3d2e1a;background:#1a1208;position:relative}
+.load-bar{height:100%;background:#e8d5a3;transition:width .15s;box-shadow:0 0 8px rgba(232,213,163,0.5)}
+.load-pct{font-family:'VT323',monospace;font-size:1.1rem;color:#8b7355;letter-spacing:2px}
+.blink{animation:bl .7s step-end infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ---- LANDING ---- */
+#s-land{text-align:center;gap:1rem}
+.land-title{font-family:'Silkscreen',monospace;font-size:2.4rem;color:#e8d5a3;line-height:1.1;text-shadow:0 0 40px rgba(232,213,163,0.3)}
+.land-by{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;color:#8b7355;margin:.2rem 0}
+.land-tag{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;color:#a08060;line-height:1.5;margin:.5rem 0 1.2rem;border-left:2px solid #3d2e1a;padding-left:.8rem;text-align:left}
+.ink-btn{display:inline-block;font-family:'Pixelify Sans',monospace;font-size:.85rem;padding:.6rem 1.4rem;border:2px solid #5c4a2a;background:rgba(232,213,163,0.06);color:#e8d5a3;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s;margin:.3rem}
+.ink-btn:hover{background:rgba(232,213,163,0.14);border-color:#e8d5a3}
+.ink-btn.accent{border-color:#8b5a2b;color:#c8955a}
+.ink-btn.accent:hover{background:rgba(200,149,90,0.15)}
+.sticker{position:absolute;font-size:1.4rem;animation:flt 4s ease-in-out infinite alternate;pointer-events:none}
+@keyframes flt{0%{transform:translateY(0) rotate(-4deg)}100%{transform:translateY(-14px) rotate(4deg)}}
+
+/* ---- BOOK ---- */
+#s-book{gap:0}
+.book-wrap{width:100%;max-width:380px;perspective:900px}
+.book{width:100%;position:relative;transform-style:preserve-3d}
+.page{background:#f5f0e6;border-radius:2px 8px 8px 2px;padding:1.4rem 1.4rem 1.2rem;position:relative;min-height:440px;box-shadow:-4px 4px 20px rgba(0,0,0,0.6),4px 0 8px rgba(0,0,0,0.2);display:flex;flex-direction:column}
+.page::before{content:'';position:absolute;top:0;left:0;bottom:0;width:28px;background:linear-gradient(90deg,#c8b89a,#ddd0b8 40%,#f5f0e6);border-radius:2px 0 0 2px}
+.page::after{content:'';position:absolute;top:0;left:26px;bottom:0;width:2px;background:repeating-linear-gradient(180deg,#e0c8a0,#e0c8a0 8px,transparent 8px,transparent 16px);opacity:.4}
+.page-lines{position:absolute;top:0;left:28px;right:0;bottom:0;background:repeating-linear-gradient(180deg,transparent,transparent 27px,rgba(180,160,120,0.25) 27px,rgba(180,160,120,0.25) 28px);pointer-events:none;border-radius:0 8px 8px 0}
+.page-content{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;padding-left:18px}
+.q-num{font-family:'Silkscreen',monospace;font-size:.65rem;color:#8b7355;letter-spacing:2px;margin-bottom:.4rem}
+.q-cat{font-family:'Pixelify Sans',monospace;font-size:.75rem;color:#c8955a;letter-spacing:1px;margin-bottom:.6rem;display:flex;align-items:center;gap:.3rem}
+.q-emoji{font-size:1.3rem}
+.q-text{font-family:'Playfair Display',serif;font-style:italic;color:#2c1a08;font-size:1.05rem;line-height:1.45;margin-bottom:1rem;flex-shrink:0}
+.book-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid #c8b89a;color:#2c1a08;font-family:'VT323',monospace;font-size:1.15rem;padding:.3rem 0;outline:none;resize:none;line-height:1.4;flex:1;min-height:80px}
+.book-input::placeholder{color:#b0a090}
+.book-input:focus{border-bottom-color:#8b5a2b}
+
+.page-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:.8rem;border-top:1px solid rgba(180,160,120,0.3)}
+.pg-num{font-family:'Playfair Display',serif;font-style:italic;font-size:.8rem;color:#8b7355}
+.book-nav{display:flex;gap:.5rem}
+.book-btn{font-family:'Pixelify Sans',monospace;font-size:.75rem;padding:.35rem .7rem;border:1.5px solid #8b7355;background:transparent;color:#5c4a2a;cursor:pointer;transition:all .2s;text-transform:uppercase}
+.book-btn:hover{background:#e8d5a3;color:#2c1a08;border-color:#2c1a08}
+.book-btn.primary{border-color:#8b5a2b;color:#8b5a2b;background:rgba(139,90,43,0.08)}
+.book-btn.primary:hover{background:#8b5a2b;color:#f5f0e6}
+
+.progress-dots{display:flex;gap:4px;margin-bottom:.5rem;flex-wrap:wrap}
+.dot{width:7px;height:7px;background:#ddd0b8;border-radius:50%;transition:background .3s}
+.dot.done{background:#8b5a2b}
+.dot.current{background:#c8955a;transform:scale(1.3)}
+
+/* FLIP ANIMATION */
+.flipping-out{animation:flipOut .3s ease-in forwards;transform-origin:left center}
+.flipping-in{animation:flipIn .3s ease-out forwards;transform-origin:left center}
+@keyframes flipOut{0%{transform:rotateY(0deg) scaleX(1);opacity:1}50%{transform:rotateY(-90deg) scaleX(0.1);opacity:.3}100%{transform:rotateY(-90deg) scaleX(0);opacity:0}}
+@keyframes flipIn{0%{transform:rotateY(90deg) scaleX(0);opacity:0}50%{transform:rotateY(45deg) scaleX(0.5);opacity:.6}100%{transform:rotateY(0deg) scaleX(1);opacity:1}}
+
+/* INTRO PAGE */
+.intro-field{margin-bottom:.8rem}
+.intro-label{font-family:'Pixelify Sans',monospace;font-size:.75rem;color:#8b7355;letter-spacing:1px;margin-bottom:.3rem;display:block}
+.intro-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid #c8b89a;color:#2c1a08;font-family:'Playfair Display',serif;font-size:1rem;padding:.3rem 0;outline:none}
+.intro-input:focus{border-bottom-color:#8b5a2b}
+.av-row{display:flex;gap:.4rem;flex-wrap:wrap;margin:.3rem 0}
+.av{font-size:1.3rem;cursor:pointer;padding:2px;border:2px solid transparent;border-radius:4px;transition:all .2s}
+.av:hover,.av.sel{border-color:#8b5a2b;background:rgba(139,90,43,0.1)}
+.anon-row{display:flex;align-items:center;gap:.5rem;cursor:pointer;margin-top:.5rem}
+.anon-box{width:14px;height:14px;border:2px solid #8b7355;position:relative}
+.anon-box.checked::after{content:'X';position:absolute;top:-4px;left:0;font-size:.7rem;color:#8b5a2b;font-family:'VT323',monospace}
+.anon-label{font-family:'Pixelify Sans',monospace;font-size:.75rem;color:#8b7355}
+
+/* RESULT */
+#s-result{gap:1rem;align-items:center;text-align:center}
+.result-book{background:#f5f0e6;width:100%;max-width:360px;padding:1.5rem;border-radius:4px;box-shadow:-4px 4px 20px rgba(0,0,0,0.6);position:relative}
+.result-book::before{content:'';position:absolute;top:0;left:0;bottom:0;width:22px;background:linear-gradient(90deg,#c8b89a,#ddd0b8 40%,#f5f0e6);border-radius:2px 0 0 2px}
+.result-content{padding-left:18px;text-align:left}
+.result-title{font-family:'Silkscreen',monospace;font-size:1rem;color:#2c1a08;margin-bottom:.3rem;letter-spacing:1px}
+.result-name{font-family:'Playfair Display',serif;font-style:italic;font-size:1.3rem;color:#8b5a2b;margin-bottom:1rem}
+.stat-line{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px dashed #d4c4a0;font-family:'VT323',monospace;font-size:1.15rem;color:#2c1a08}
+.stat-v{color:#8b5a2b;font-weight:700}
+.result-msg{font-family:'Playfair Display',serif;font-style:italic;font-size:.85rem;color:#8b7355;margin-top:.8rem;border-top:1px solid #d4c4a0;padding-top:.8rem;text-align:center}
+.confetti-p{position:fixed;pointer-events:none;font-size:1.1rem;animation:cfall 3s forwards;z-index:9997}
+@keyframes cfall{0%{transform:translateY(-40px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(540deg);opacity:0}}
+
+/* WALL */
+#s-wall{gap:1rem;width:100%;max-width:400px}
+.wall-hd{font-family:'Silkscreen',monospace;font-size:1.3rem;color:#e8d5a3;text-align:center;letter-spacing:2px}
+.wall-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;width:100%}
+.wcard{background:#1a1208;border:1.5px solid #3d2e1a;padding:.9rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.wcard::after{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:#3d2e1a;transition:background .2s}
+.wcard:hover{border-color:#8b5a2b}
+.wcard:hover::after{background:#8b5a2b}
+.wcard-av{font-size:1.8rem;text-align:center;margin-bottom:.4rem}
+.wcard-name{font-family:'Pixelify Sans',monospace;font-size:.8rem;color:#e8d5a3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wcard-rank{font-family:'VT323',monospace;font-size:.95rem;color:#8b7355;text-align:center}
+.wcard-add{border:1.5px dashed #3d2e1a;display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:100px;color:#5c4a2a;font-family:'Pixelify Sans',monospace;font-size:.75rem;text-align:center;transition:all .2s}
+.wcard-add:hover{border-color:#8b5a2b;color:#c8955a}
+
+/* DETAIL */
+#s-detail{gap:1rem;width:100%;max-width:400px}
+.detail-page{background:#f5f0e6;width:100%;padding:1.4rem;border-radius:2px 8px 8px 2px;box-shadow:-4px 4px 20px rgba(0,0,0,0.6);position:relative}
+.detail-page::before{content:'';position:absolute;top:0;left:0;bottom:0;width:22px;background:linear-gradient(90deg,#c8b89a,#ddd0b8 40%,#f5f0e6);border-radius:2px 0 0 2px}
+.detail-inner{padding-left:16px}
+.d-hd{display:flex;align-items:center;gap:.8rem;margin-bottom:1rem;padding-bottom:.8rem;border-bottom:1px solid #d4c4a0}
+.d-av{font-size:2.5rem}
+.d-name{font-family:'Playfair Display',serif;font-size:1.2rem;color:#2c1a08}
+.d-rank{font-family:'VT323',monospace;font-size:1rem;color:#8b7355}
+.d-ans{margin-bottom:.7rem;border-bottom:1px dashed #d4c4a0;padding-bottom:.6rem}
+.d-q{font-family:'Pixelify Sans',monospace;font-size:.7rem;color:#8b5a2b;letter-spacing:1px;margin-bottom:.2rem}
+.d-a{font-family:'VT323',monospace;font-size:1.1rem;color:#2c1a08;line-height:1.3}
+
+.back-btn{font-family:'Pixelify Sans',monospace;font-size:.8rem;color:#8b7355;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;border:1.5px solid #3d2e1a;padding:.3rem .7rem;background:transparent;transition:all .2s}
+.back-btn:hover{border-color:#8b5a2b;color:#e8d5a3}
+</style>
+
+<div class="scanlines"></div>
+<div class="grain"></div>
+<div class="stars-wrap" id="stars"></div>
+
+<div class="app">
+
+<div class="screen active" id="s-load">
+  <div class="load-title">Memory.exe</div>
+  <div class="load-sub">MANKENA'S SLAM BOOK</div>
+  <div style="font-size:1.4rem;margin:.5rem 0">☀️ 🔱 💖</div>
+  <div class="load-bar-wrap"><div class="load-bar" id="lbar" style="width:0"></div></div>
+  <div class="load-pct" id="lpct">0%</div>
+  <div style="font-family:'VT323',monospace;font-size:1rem;color:#5c4a2a;letter-spacing:2px">Opening the book<span class="blink">...</span></div>
+</div>
+
+<div class="screen" id="s-land">
+  <div class="sticker" style="top:-20px;left:10px;animation-delay:0s">☀️</div>
+  <div class="sticker" style="top:-10px;right:15px;animation-delay:1s">🗣️</div>
+  <div class="sticker" style="bottom:10px;left:5px;animation-delay:.6s">🔱</div>
+  <div class="sticker" style="bottom:20px;right:10px;animation-delay:1.4s">💖</div>
+  <div style="text-align:center">
+    <div style="font-size:2rem;margin-bottom:.5rem">📖</div>
+    <div class="land-title">Memory.exe</div>
+    <div class="land-by">Mankena's Slam Book</div>
+  </div>
+  <div class="land-tag">"Before we become strangers<br>with memories."</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem">
+    <button class="ink-btn accent" onclick="goSlam()">✒️ Fill the Book</button>
+    <button class="ink-btn" onclick="goConfess()">Confess </button>
+    <button class="ink-btn" onclick="goWall()">Archive Access</button>
+  </div>
+  <div style="font-family:'VT323',monospace;font-size:.85rem;color:#3d2e1a;margin-top:1.5rem;letter-spacing:2px">private archive protected<br>— written in ink & pixels —</div>
+</div>
+
+<div class="screen" id="s-book">
+  <div class="book-wrap">
+    <div class="book" id="book-el">
+      <div class="page" id="page-el">
+        <div class="page-lines"></div>
+        <div class="page-content" id="page-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-result">
+  <div style="font-size:2rem">🎉</div>
+  <div class="result-book">
+    <div class="result-content">
+      <div class="result-title">FRIENDSHIP STATS</div>
+      <div class="result-name" id="r-name"></div>
+      <div id="r-stats"></div>
+      <div class="result-msg" id="r-msg"></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
+    <button class="ink-btn" onclick="goWall()">📖 Memory Wall</button>
+    <button class="ink-btn accent" onclick="goLand()">🏠 Home</button>
+  </div>
+</div>
+
+<div class="screen" id="s-wall">
+  <div class="wall-hd">📚 Memory Wall</div>
+  <div style="font-family:'VT323',monospace;font-size:.9rem;color:#5c4a2a;text-align:center;letter-spacing:2px">Mankena's Collected Souls</div>
+  <div class="wall-grid" id="wall-grid"></div>
+  <div style="display:flex;gap:.6rem;justify-content:center">
+    <button class="ink-btn accent" onclick="goSlam()">✒️ Add Entry</button>
+    <button class="ink-btn" onclick="goLand()">🏠 Home</button>
+  </div>
+</div>
+
+<div class="screen" id="s-detail">
+  <button class="back-btn" onclick="goWall()">◀ Back</button>
+  <div class="detail-page">
+    <div class="detail-inner">
+      <div class="d-hd">
+        <div class="d-av" id="d-av"></div>
+        <div><div class="d-name" id="d-nm"></div><div class="d-rank" id="d-rk"></div></div>
+      </div>
+      <div id="d-body"></div>
+    </div>
+  </div>
+</div>
+
+
+<div class="screen" id="s-confess">
+  <div class="book-wrap">
+    <div class="page">
+      <div class="page-lines"></div>
+
+      <div class="page-content">
+
+        <div class="q-num">CONFESSION ARCHIVE</div>
+
+        <div style="width:100%;height:1px;background:rgba(180,160,120,0.35);margin:.4rem 0 1rem 0;"></div>
+
+        <div class="q-text">
+          Say something you never had the courage to say.
+        </div>
+
+        <textarea
+        class="book-input"
+        id="confess-input"
+        placeholder="This stays between the pages..."
+        style="min-height:180px"></textarea>
+
+        <div class="page-bottom">
+
+          <div class="pg-num">
+            No names. No consequences.
+          </div>
+
+          <div class="book-nav">
+
+            <button class="book-btn" onclick="goLand()">
+              ◀ Back
+            </button>
+
+            <button class="book-btn primary" onclick="submitConfession()">
+              Seal Confession ✒️
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<script>
+
+const AVTS = ['👽','🔱','💅','🤏','☀️','💖','🔥','😼','🐉','🐅','🦁','🐗'];
+
+const QS = [
+  { t: "What was your very first impression of me?", k: "first" },
+  { t: "What’s a moment with me that still randomly crosses your mind?", k: "memory" },
+  { t: "If you had to rename me, what would you call me?", k: "rename" },
+  { t: "Describe me in one word.", k: "word" },
+  { t: "What’s something I do that annoys you, but you tolerate anyway?", k: "annoy" },
+  { t: "Leave something for future me to read someday.", k: "future" },
+  { t: "Do you think we’ll still be close in 5 years?", k: "years" },
+  { t: "My drama level:", k: "drama", options:['Calm','Problematic','Absolute Disaster'] },
+  { t: "When do you think I seemed happiest?", k: "happy" },
+  { t: "What song reminds you of me?", k: "song" },
+  { t: "What’s something you never told me before?", k: "secret" },
+  { t: "What’s one thing you hope never changes about me?", k: "neverchange" },
+  { t: "If someone asked about me years later, what would you say?", k: "futurememory" }
+];
+
+const PAGE_GROUPS = [
+  ["first","memory"],
+  ["rename","word"],
+  ["annoy","future"],
+  ["years","drama"],
+  ["happy","song"],
+  ["secret","neverchange"],
+  ["futurememory"]
+];
+
+const RANKS=['👑 SSS+','⭐ S+','🔥 S','💜 A+','🌸 A'];
+const LVLS=['LEGENDARY','ELITE','SSS+','S-TIER','UNMATCHED'];
+const MSGS=["Your memory is now pressed into these pages forever.","A page has been written. The ink never fades.","Filed under: irreplaceable.","Classified as a core memory."];
+
+let qi=0,phase='intro',answers={},uname='',uav='📖',anon=false,entries=[];
+try{let s=localStorage.getItem('mank_v2');if(s)entries=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem('mank_v2',JSON.stringify(entries));}catch(e){}}
+
+function mkStars(){
+  const w=document.getElementById('stars');
+  for(let i=0;i<50;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()*2.5+.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;opacity:.3`;
+    w.appendChild(s);
+  }
+}
+mkStars();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goLand(){show('s-land')}
+
+function goConfess(){
+  show('s-confess');
+}
+
+function submitConfession(){
+
+  const val = document.getElementById('confess-input').value.trim();
+
+  if(!val){
+    alert('Write something before sealing the confession.');
+    return;
+  }
+
+  const confessions = JSON.parse(localStorage.getItem('mank_confessions') || '[]');
+
+  confessions.push({
+    text: val,
+    ts: Date.now()
+  });
+
+  localStorage.setItem('mank_confessions', JSON.stringify(confessions));
+
+  alert('Confession sealed.');
+
+  goLand();
+}
+
+
+function goWall(){
+
+  const pass = prompt("Enter archive key");
+
+  if(pass !== "mankena123"){
+    alert("Access denied.");
+    return;
+  }
+
+  renderWall();
+  show('s-wall');
+}
+
+
+function startLoad(){
+  let p=0;
+  const bar=document.getElementById('lbar'),pct=document.getElementById('lpct');
+  const iv=setInterval(()=>{
+    p+=Math.random()*9+2;
+    if(p>=100){p=100;clearInterval(iv);setTimeout(()=>show('s-land'),500);}
+    bar.style.width=p+'%';
+    pct.textContent=Math.floor(p)+'%';
+  },130);
+}
+startLoad();
+
+function goSlam(){qi=0;phase='intro';answers={};uname='';uav='📖';show('s-book');renderPage(false);}
+
+function renderPage(flip){
+  const el=document.getElementById('page-el');
+  if(flip){
+    el.classList.remove('flipping-in','flipping-out');
+    el.classList.add('flipping-out');
+    setTimeout(()=>{
+      el.classList.remove('flipping-out');
+      buildPageContent();
+      el.classList.add('flipping-in');
+      setTimeout(()=>el.classList.remove('flipping-in'),350);
+    },300);
+  } else {
+    buildPageContent();
+  }
+}
+
+
+function buildPageContent(){
+
+  const pc = document.getElementById('page-content');
+
+  if(phase==='intro'){
+
+    pc.innerHTML = `
+      <div class="q-num">MEMORY.EXE — ARCHIVE ENTRY</div>
+
+      <div style="width:100%;height:1px;background:rgba(180,160,120,0.35);margin:.4rem 0 1rem 0;"></div>
+
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:.95rem;color:#2c1a08;margin-bottom:1rem;line-height:1.4">
+      "These pages remember everything."
+      </div>
+
+      <div class="intro-field">
+        <label class="intro-label">NAME</label>
+        <input class="intro-input" type="text" id="nm-in" placeholder="Write your name..." maxlength="24" value="${uname}">
+      </div>
+
+      <div class="intro-field">
+        <label class="intro-label">PHONE NUMBER</label>
+        <input class="intro-input" type="text" id="ph-in" placeholder="Your number...">
+      </div>
+
+      <div class="intro-field">
+        <label class="intro-label">DATE OF BIRTH</label>
+        <input class="intro-input" type="date" id="dob-in">
+      </div>
+
+      <div class="intro-field">
+        <label class="intro-label">CHOOSE YOUR SYMBOL</label>
+        <div class="av-row" id="av-row">
+          ${AVTS.map(a=>`<span class="av${a===uav?' sel':''}" onclick="pickAv('${a}',this)">${a}</span>`).join('')}
+        </div>
+      </div>
+      <div style="margin-top:1rem;text-align:center">
+        
+      </div>
+
+      <div class="page-bottom">
+        <div class="pg-num">Recorded into archive.</div>
+        <div class="book-nav">
+          <button class="book-btn primary" onclick="nextPage()">
+            Open Archive ➜
+          </button>
+        </div>
+      </div>
+    `;
+
+  } else if(phase==='done'){
+
+    submitEntry();
+
+  } else {
+
+    const keys = PAGE_GROUPS[qi];
+    const total = PAGE_GROUPS.length;
+
+    const dots = PAGE_GROUPS.map((_,i)=>
+      `<div class="dot${i<qi?'done':i===qi?'current':''}"></div>`
+    ).join('');
+
+    let html = `
+      <div class="q-num">PAGE ${qi + 1}</div>
+
+      <div class="progress-dots">${dots}</div>
+
+      <div style="width:100%;height:1px;background:rgba(180,160,120,0.35);margin:.4rem 0 1rem 0;"></div>
+    `;
+
+    keys.forEach((key,index)=>{
+
+      const q = QS.find(x=>x.k===key);
+
+      html += `
+        <div style="margin-bottom:${index !== keys.length-1 ? '2rem' : '1rem'}">
+
+          <div class="q-text">
+            ${q.t}
+          </div>
+      `;
+
+      if(q.options){
+
+        html += `
+          <select class="book-input"
+          id="ans-${q.k}"
+          style="height:50px">
+
+            <option value="">Choose...</option>
+
+            ${q.options.map(op=>
+              `<option value="${op}">${op}</option>`
+            ).join('')}
+
+          </select>
+        `;
+
+      } else {
+
+        html += `
+          <textarea
+          class="book-input"
+          id="ans-${q.k}"
+          placeholder="Write here..."
+          style="min-height:${q.k === 'futurememory' ? '140px' : '90px'};margin-top:.4rem;"
+          >${answers[q.k] || ''}</textarea>
+        `;
+      }
+
+      html += `</div>`;
+    });
+
+    html += `
+      <div class="page-bottom">
+
+        <div class="pg-num">
+          Archived permanently.
+        </div>
+
+        <div class="book-nav">
+
+          <button class="book-btn" onclick="prevPage()">
+            ◀ Back
+          </button>
+
+          <button class="book-btn primary" onclick="nextPage()">
+            ${qi === total-1 ? 'Seal Memory ✒️' : 'Next ➜'}
+          </button>
+
+        </div>
+
+      </div>
+    `;
+
+    pc.innerHTML = html;
+  }
+}
+
+
+function pickAv(a,el){uav=a;document.querySelectorAll('.av').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function toggleAnon(){anon=!anon;const b=document.getElementById('anon-box');if(b)b.className='anon-box'+(anon?' checked':'');}
+
+
+function nextPage(){
+
+  if(phase==='intro'){
+
+    const ni = document.getElementById('nm-in');
+
+    uname = ni ? ni.value.trim() || 'Anonymous' : 'Anonymous';
+
+    
+
+    phase='q';
+    qi=0;
+
+    renderPage(true);
+
+  } else {
+
+    PAGE_GROUPS[qi].forEach(key=>{
+
+      const input = document.getElementById(`ans-${key}`);
+
+      if(input){
+        answers[key] = input.value.trim();
+      }
+
+    });
+
+    const filled = Object.values(answers).some(v => v && v.trim() !== '');
+
+    if(qi >= PAGE_GROUPS.length - 1){
+
+      if(!filled){
+        alert('You cannot seal completely blank pages.');
+        return;
+      }
+
+      phase='done';
+      submitEntry();
+
+    } else {
+
+      qi++;
+      renderPage(true);
+
+    }
+  }
+}
+
+
+
+function prevPage(){
+
+  if(phase==='q' && qi > 0){
+
+    PAGE_GROUPS[qi].forEach(key=>{
+
+      const input = document.getElementById(`ans-${key}`);
+
+      if(input){
+        answers[key] = input.value.trim();
+      }
+
+    });
+
+    qi--;
+    renderPage(true);
+
+  } else if(phase==='q' && qi===0){
+
+    phase='intro';
+    renderPage(true);
+
+  }
+}
+
+
+function submitEntry(){
+  const e={name:uname,av:uav,answers:{...answers},ts:Date.now(),lvl:LVLS[Math.floor(Math.random()*LVLS.length)],chaos:Math.floor(Math.random()*35+60),rank:RANKS[Math.floor(Math.random()*RANKS.length)]};
+  entries.push(e);save();
+  document.getElementById('r-name').textContent=uav+' '+uname;
+  document.getElementById('r-stats').innerHTML=`
+    <div class="stat-line"><span>❤️ Friendship</span><span class="stat-v">${e.lvl}</span></div>
+    <div class="stat-line"><span>🌪 Chaos Meter</span><span class="stat-v">${e.chaos}%</span></div>
+    <div class="stat-line"><span>📱 Reply Speed</span><span class="stat-v">${answers.reply||'???'}/10</span></div>
+    <div class="stat-line"><span>👑 Loyalty Rank</span><span class="stat-v">${e.rank}</span></div>
+    <div class="stat-line"><span>⚡ One Word</span><span class="stat-v">${(answers.word||'iconic').toUpperCase()}</span></div>`;
+  document.getElementById('r-msg').textContent=MSGS[Math.floor(Math.random()*MSGS.length)];
+  show('s-result');spawnConfetti();
+}
+
+function spawnConfetti(){
+  const e=['🌸','⭐','📖','✒️','💜','🕯️'];
+  for(let i=0;i<16;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');
+      c.className='confetti-p';
+      c.textContent=e[Math.floor(Math.random()*e.length)];
+      c.style.left=Math.random()*100+'vw';c.style.top='-30px';
+      c.style.animationDuration=(2+Math.random()*2)+'s';
+      document.body.appendChild(c);setTimeout(()=>c.remove(),4500);
+    },i*90);
+  }
+}
+
+function renderWall(){
+  const g=document.getElementById('wall-grid');g.innerHTML='';
+  [...entries].reverse().forEach(e=>{
+    const c=document.createElement('div');c.className='wcard';
+    c.innerHTML=`<div class="wcard-av">${e.av}</div><div class="wcard-name">${e.name}</div><div class="wcard-rank">${e.rank}</div>`;
+    c.onclick=()=>showDetail(e);g.appendChild(c);
+  });
+  const add=document.createElement('div');add.className='wcard-add';
+  add.innerHTML='+ Fill<br>the book';add.onclick=goSlam;g.appendChild(add);
+}
+
+function showDetail(e){
+  document.getElementById('d-av').textContent=e.av;
+  document.getElementById('d-nm').textContent=e.name;
+  document.getElementById('d-rk').textContent=e.rank+' · '+e.lvl;
+  const labels={first:'First Impression',funny:'Funniest Memory',chaos:'Most Chaotic Moment',nick:'Nickname',word:'One Word',habit:'Annoying Habit',future:'Message to Future Mankena',years:'Still Close in 5 Years?',wisdom:'Never Forget This',zombie:'Zombie Apocalypse',reply:'Reply Speed',drama:'Drama Level'};
+  document.getElementById('d-body').innerHTML=Object.entries(e.answers).filter(([k,v])=>v).map(([k,v])=>`<div class="d-ans"><div class="d-q">${labels[k]||k}</div><div class="d-a">${v}</div></div>`).join('')||'<div style="font-family:VT323,monospace;color:#8b7355;font-size:1.1rem">No answers written yet.</div>';
+  show('s-detail');
+}
+</script>
