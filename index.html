@@ -3,7 +3,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;700&family=VT323&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0c0a08;font-family:'VT323',monospace;min-height:100vh;overflow-x:hidden}
+body{background:#0c0a08;font-family:'VT323',monospace;min-height:auto;overflow-x:hidden}
 
 .app{background:#0c0a08;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;position:relative}
 
@@ -379,6 +379,79 @@ padding:1rem;
 .detail-page{
 border-radius:0;
 box-shadow:none;
+}
+
+}
+
+
+/* BALANCED MOBILE LAYOUT */
+@media (max-width:768px){
+
+.app{
+justify-content:center !important;
+padding:1rem .7rem !important;
+}
+
+.page{
+min-height:auto !important;
+height:auto !important;
+max-height:none !important;
+border-radius:14px !important;
+padding:1.2rem .9rem 1rem !important;
+box-shadow:-4px 4px 20px rgba(0,0,0,0.55) !important;
+}
+
+.book-wrap{
+max-width:420px !important;
+margin:auto !important;
+}
+
+.page-content{
+padding-left:12px !important;
+}
+
+.q-text{
+font-size:1.1rem !important;
+line-height:1.6 !important;
+margin-bottom:.8rem !important;
+}
+
+.book-input{
+min-height:85px !important;
+font-size:1.15rem !important;
+}
+
+.intro-input{
+font-size:1.05rem !important;
+padding:.45rem 0 !important;
+}
+
+.land-title{
+font-size:2.1rem !important;
+}
+
+.page-bottom{
+margin-top:1rem !important;
+padding-top:.7rem !important;
+flex-direction:row !important;
+align-items:center !important;
+justify-content:space-between !important;
+}
+
+.book-nav{
+width:auto !important;
+gap:.5rem !important;
+}
+
+.book-btn,
+.ink-btn{
+min-height:40px !important;
+font-size:.78rem !important;
+padding:.55rem .85rem !important;
+}
+
+.wall-grid{
+grid-template-columns:1fr !important;
 }
 
 }
