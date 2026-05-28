@@ -488,7 +488,6 @@ grid-template-columns:1fr !important;
     <button class="ink-btn accent" onclick="goSlam()">✒️ Fill the Book</button>
     <button class="ink-btn" onclick="goConfess()">🌶️ Confess </button>
     <button class="ink-btn" onclick="goWall()">🔒 Archive Access</button>
-<button class="ink-btn" style="opacity:.45;font-size:.7rem" onclick="goConfessions()">🖤 Admin Confessions</button>
   </div>
   <div style="font-family:'VT323',monospace;font-size:.85rem;color:#3d2e1a;margin-top:1.5rem;letter-spacing:2px">private archive protected<br>— written in ink & pixels —</div>
 </div>
@@ -592,25 +591,42 @@ grid-template-columns:1fr !important;
 </div>
 
 
-
-<div class="screen" id="s-confessions">
-  <div class="wall-hd">🖤 Confession Archive</div>
-
-  <div id="confession-list" style="
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:.8rem;
-  max-width:420px;
-  "></div>
-
-  <div style="margin-top:1rem">
-    <button class="ink-btn" onclick="goLand()">🏠 Home</button>
-  </div>
 </div>
 
+<script type="module">
 
-</div>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDuwFi_NtYLLHNhSXpOtA62PHF8FYLAPS4",
+  authDomain: "memory-exe-a3f8d.firebaseapp.com",
+  projectId: "memory-exe-a3f8d",
+  storageBucket: "memory-exe-a3f8d.firebasestorage.app",
+  messagingSenderId: "149400363015",
+  appId: "1:149400363015:web:3c9ea06d9b33aa80d8caa2"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.query = query;
+window.orderBy = orderBy;
+
+</script>
 
 <script>
 
@@ -737,65 +753,6 @@ async function goWall(){
   await renderWall();
 }
 
-
-
-async function goConfessions(){
-
-  const pass = prompt("Enter confession archive key");
-
-  if(pass !== "mankena123"){
-    alert("Access denied.");
-    return;
-  }
-
-  show('s-confessions');
-
-  const box = document.getElementById('confession-list');
-
-  box.innerHTML = '<div style="color:#8b7355;font-family:VT323,monospace">Loading confessions...</div>';
-
-  try{
-
-    const qy = query(
-      collection(db, "confessions"),
-      orderBy("ts", "desc")
-    );
-
-    const snap = await getDocs(qy);
-
-    box.innerHTML = '';
-
-    snap.forEach(doc=>{
-
-      const d = doc.data();
-
-      const el = document.createElement('div');
-
-      el.style.cssText = `
-      background:#1a1208;
-      border:1px solid #3d2e1a;
-      padding:1rem;
-      color:#e8d5a3;
-      font-family:'VT323',monospace;
-      line-height:1.5;
-      font-size:1.1rem;
-      `;
-
-      el.innerHTML = d.text;
-
-      box.appendChild(el);
-
-    });
-
-  } catch(err){
-
-    console.error(err);
-
-    box.innerHTML = '<div style="color:#c8955a">Could not load confessions.</div>';
-
-  }
-
-}
 
 function startLoad(){
   let p=0;
@@ -1148,37 +1105,4 @@ function showDetail(e){
 }
 </script>
 
-<script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDuwFi_NtYLLHNhSXpOtA62PHF8FYLAPS4",
-  authDomain: "memory-exe-a3f8d.firebaseapp.com",
-  projectId: "memory-exe-a3f8d",
-  storageBucket: "memory-exe-a3f8d.firebasestorage.app",
-  messagingSenderId: "149400363015",
-  appId: "1:149400363015:web:3c9ea06d9b33aa80d8caa2"
-};
-
-const app = initializeApp(firebaseConfig);
-
-const db = getFirestore(app);
-
-window.db = db;
-window.collection = collection;
-window.addDoc = addDoc;
-window.getDocs = getDocs;
-window.query = query;
-window.orderBy = orderBy;
-
-</script>
