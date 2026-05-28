@@ -629,7 +629,24 @@ const MSGS=["Your memory is now pressed into these pages forever.","A page has b
 
 let qi=0,phase='intro',answers={},uname='',uav='📖',anon=false,entries=[];
 try{let s=localStorage.getItem('mank_v2');if(s)entries=JSON.parse(s);}catch(e){}
-function save(){try{localStorage.setItem('mank_v2',JSON.stringify(entries));}catch(e){}}
+async function saveEntry(entry){
+
+  try{
+
+    await addDoc(
+      collection(db, "memories"),
+      entry
+    );
+
+    console.log("saved");
+
+  } catch(err){
+
+    console.error(err);
+
+  }
+
+}
 
 function mkStars(){
   const w=document.getElementById('stars');
@@ -654,7 +671,7 @@ function goConfess(){
   show('s-confess');
 }
 
-function submitConfession(){
+async function submitConfession(){
 
   const val = document.getElementById('confess-input').value.trim();
 
@@ -663,18 +680,27 @@ function submitConfession(){
     return;
   }
 
-  const confessions = JSON.parse(localStorage.getItem('mank_confessions') || '[]');
+  try{
 
-  confessions.push({
-    text: val,
-    ts: Date.now()
-  });
+    await addDoc(
+      collection(db, "confessions"),
+      {
+        text: val,
+        ts: Date.now()
+      }
+    );
 
-  localStorage.setItem('mank_confessions', JSON.stringify(confessions));
+    alert('Confession sealed.');
 
-  alert('Confession sealed.');
+    goLand();
 
-  goLand();
+  } catch(err){
+
+    alert('Could not save confession.');
+
+    console.error(err);
+
+  }
 }
 
 
@@ -946,7 +972,8 @@ function prevPage(){
 
 function submitEntry(){
   const e={name:uname,av:uav,answers:{...answers},ts:Date.now(),lvl:LVLS[Math.floor(Math.random()*LVLS.length)],chaos:Math.floor(Math.random()*35+60),rank:RANKS[Math.floor(Math.random()*RANKS.length)]};
-  entries.push(e);save();
+  entries.push(e);
+saveEntry(e);
   document.getElementById('r-name').textContent=uav+' '+uname;
   document.getElementById('r-stats').innerHTML=`
     <div class="stat-line"><span>❤️ Friendship</span><span class="stat-v">${e.lvl}</span></div>
@@ -991,4 +1018,39 @@ function showDetail(e){
   document.getElementById('d-body').innerHTML=Object.entries(e.answers).filter(([k,v])=>v).map(([k,v])=>`<div class="d-ans"><div class="d-q">${labels[k]||k}</div><div class="d-a">${v}</div></div>`).join('')||'<div style="font-family:VT323,monospace;color:#8b7355;font-size:1.1rem">No answers written yet.</div>';
   show('s-detail');
 }
+</script>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDuwFi_NtYLLHNhSXpOtA62PHF8FYLAPS4",
+  authDomain: "memory-exe-a3f8d.firebaseapp.com",
+  projectId: "memory-exe-a3f8d",
+  storageBucket: "memory-exe-a3f8d.firebasestorage.app",
+  messagingSenderId: "149400363015",
+  appId: "1:149400363015:web:3c9ea06d9b33aa80d8caa2"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.addDoc = addDoc;
+window.getDocs = getDocs;
+window.query = query;
+window.orderBy = orderBy;
+
 </script>
