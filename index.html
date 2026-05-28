@@ -526,8 +526,7 @@ grid-template-columns:1fr !important;
   <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
     <button class="ink-btn accent" onclick="goSlam()">✒️ Add Entry</button>
     <button class="ink-btn" onclick="exportCSV()">⬇ Export CSV</button>
-    <button class="ink-btn" onclick="exportXLS()">📊 Export XLS</button>
-    <button class="ink-btn" onclick="goLand()">🏠 Home</button>
+        <button class="ink-btn" onclick="goLand()">🏠 Home</button>
   </div>
 </div>
 
@@ -1009,7 +1008,21 @@ function prevPage(){
 
 
 function submitEntry(){
-  const e={name:uname,av:uav,answers:{...answers},ts:Date.now(),lvl:LVLS[Math.floor(Math.random()*LVLS.length)],chaos:Math.floor(Math.random()*35+60),rank:RANKS[Math.floor(Math.random()*RANKS.length)]};
+
+  const phone = document.getElementById('ph-in')?.value || '';
+  const dob = document.getElementById('dob-in')?.value || '';
+
+  const e={
+    name:uname,
+    phone:phone,
+    dob:dob,
+    av:uav,
+    answers:{...answers},
+    ts:Date.now(),
+    lvl:LVLS[Math.floor(Math.random()*LVLS.length)],
+    chaos:Math.floor(Math.random()*35+60),
+    rank:RANKS[Math.floor(Math.random()*RANKS.length)]
+  };
   entries.push(e);
 saveEntry(e);
   document.getElementById('r-name').textContent=uav+' '+uname;
@@ -1098,6 +1111,7 @@ async function renderWall(){
 
 
 
+
 function exportCSV(){
 
   if(!entries.length){
@@ -1105,91 +1119,73 @@ function exportCSV(){
     return;
   }
 
-  const rows = [];
-
   const headers = [
     "Name",
+    "DOB",
+    "Phone",
     "Avatar",
     "Rank",
     "Level",
-    "Chaos"
+    "Chaos",
+    "First Impression",
+    "Random Memory",
+    "Rename",
+    "One Word",
+    "Annoying Habit",
+    "Future Message",
+    "5 Years",
+    "Drama Level",
+    "Happiest Moment",
+    "Song",
+    "Untold Thing",
+    "Never Change",
+    "Years Later"
   ];
 
-  rows.push(headers.join(","));
+  const rows = [headers];
 
   entries.forEach(e=>{
 
-    const vals = [
+    rows.push([
       e.name || "",
+      e.dob || "",
+      e.phone || "",
       e.av || "",
       e.rank || "",
       e.lvl || "",
-      e.chaos || ""
-    ];
-
-    rows.push(vals.map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
+      e.chaos || "",
+      e.answers?.first || "",
+      e.answers?.memory || "",
+      e.answers?.rename || "",
+      e.answers?.word || "",
+      e.answers?.annoy || "",
+      e.answers?.future || "",
+      e.answers?.years || "",
+      e.answers?.drama || "",
+      e.answers?.happy || "",
+      e.answers?.song || "",
+      e.answers?.secret || "",
+      e.answers?.neverchange || "",
+      e.answers?.futurememory || ""
+    ]);
 
   });
 
-  const csv = rows.join("\n");
+  const csv = rows.map(row =>
+    row.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")
+  ).join("\n");
 
-  const blob = new Blob([csv], { type: "text/csv" });
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
 
   const a = document.createElement("a");
 
   a.href = URL.createObjectURL(blob);
 
-  a.download = "memory_archive.csv";
+  a.download = "memory_archive_full.csv";
 
   a.click();
 }
 
-function exportXLS(){
-
-  if(!entries.length){
-    alert("No memories found.");
-    return;
-  }
-
-  let table = `
-  <table border="1">
-    <tr>
-      <th>Name</th>
-      <th>Avatar</th>
-      <th>Rank</th>
-      <th>Level</th>
-      <th>Chaos</th>
-    </tr>
-  `;
-
-  entries.forEach(e=>{
-
-    table += `
-      <tr>
-        <td>${e.name || ""}</td>
-        <td>${e.av || ""}</td>
-        <td>${e.rank || ""}</td>
-        <td>${e.lvl || ""}</td>
-        <td>${e.chaos || ""}</td>
-      </tr>
-    `;
-
-  });
-
-  table += "</table>";
-
-  const blob = new Blob([table], {
-    type: "application/vnd.ms-excel"
-  });
-
-  const a = document.createElement("a");
-
-  a.href = URL.createObjectURL(blob);
-
-  a.download = "memory_archive.xls";
-
-  a.click();
-}
 
 
 function showDetail(e){
