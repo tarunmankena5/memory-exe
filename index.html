@@ -523,8 +523,10 @@ grid-template-columns:1fr !important;
   <div class="wall-hd">📚 Memory Wall</div>
   <div style="font-family:'VT323',monospace;font-size:.9rem;color:#5c4a2a;text-align:center;letter-spacing:2px">Mankena's Collected Souls</div>
   <div class="wall-grid" id="wall-grid"></div>
-  <div style="display:flex;gap:.6rem;justify-content:center">
+  <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
     <button class="ink-btn accent" onclick="goSlam()">✒️ Add Entry</button>
+    <button class="ink-btn" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="ink-btn" onclick="exportXLS()">📊 Export XLS</button>
     <button class="ink-btn" onclick="goLand()">🏠 Home</button>
   </div>
 </div>
@@ -1092,6 +1094,102 @@ async function renderWall(){
 
   }
 
+}
+
+
+
+function exportCSV(){
+
+  if(!entries.length){
+    alert("No memories found.");
+    return;
+  }
+
+  const rows = [];
+
+  const headers = [
+    "Name",
+    "Avatar",
+    "Rank",
+    "Level",
+    "Chaos"
+  ];
+
+  rows.push(headers.join(","));
+
+  entries.forEach(e=>{
+
+    const vals = [
+      e.name || "",
+      e.av || "",
+      e.rank || "",
+      e.lvl || "",
+      e.chaos || ""
+    ];
+
+    rows.push(vals.map(v => `"${String(v).replace(/"/g,'""')}"`).join(","));
+
+  });
+
+  const csv = rows.join("
+");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = "memory_archive.csv";
+
+  a.click();
+}
+
+function exportXLS(){
+
+  if(!entries.length){
+    alert("No memories found.");
+    return;
+  }
+
+  let table = `
+  <table border="1">
+    <tr>
+      <th>Name</th>
+      <th>Avatar</th>
+      <th>Rank</th>
+      <th>Level</th>
+      <th>Chaos</th>
+    </tr>
+  `;
+
+  entries.forEach(e=>{
+
+    table += `
+      <tr>
+        <td>${e.name || ""}</td>
+        <td>${e.av || ""}</td>
+        <td>${e.rank || ""}</td>
+        <td>${e.lvl || ""}</td>
+        <td>${e.chaos || ""}</td>
+      </tr>
+    `;
+
+  });
+
+  table += "</table>";
+
+  const blob = new Blob([table], {
+    type: "application/vnd.ms-excel"
+  });
+
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = "memory_archive.xls";
+
+  a.click();
 }
 
 
