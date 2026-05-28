@@ -131,6 +131,128 @@ body{background:#0c0a08;font-family:'VT323',monospace;min-height:100vh;overflow-
 
 .back-btn{font-family:'Pixelify Sans',monospace;font-size:.8rem;color:#8b7355;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;border:1.5px solid #3d2e1a;padding:.3rem .7rem;background:transparent;transition:all .2s}
 .back-btn:hover{border-color:#8b5a2b;color:#e8d5a3}
+
+/* MOBILE OPTIMIZATION */
+@media (max-width: 768px){
+
+  body{
+    overflow-x:hidden;
+  }
+
+  .app{
+    padding:.6rem;
+    justify-content:flex-start;
+    padding-top:1.2rem;
+  }
+
+  .screen{
+    max-width:100%;
+  }
+
+  .book-wrap,
+  .result-book,
+  .detail-page{
+    width:100%;
+    max-width:100%;
+  }
+
+  .page{
+    min-height:88vh;
+    padding:1.2rem 1rem 1rem;
+    border-radius:10px;
+  }
+
+  .page-content{
+    padding-left:14px;
+  }
+
+  .land-title{
+    font-size:2rem;
+  }
+
+  .land-tag{
+    font-size:1rem;
+    line-height:1.6;
+    padding-left:.7rem;
+  }
+
+  .q-text{
+    font-size:1.12rem;
+    line-height:1.7;
+    margin-bottom:1.2rem;
+  }
+
+  .book-input{
+    font-size:1.25rem;
+    min-height:110px;
+    line-height:1.5;
+  }
+
+  textarea.book-input{
+    padding-top:.5rem;
+  }
+
+  .intro-input{
+    font-size:1.1rem;
+    padding:.5rem 0;
+  }
+
+  .intro-label{
+    font-size:.8rem;
+  }
+
+  .book-btn{
+    min-height:44px;
+    padding:.6rem .9rem;
+    font-size:.78rem;
+  }
+
+  .ink-btn{
+    width:100%;
+    max-width:280px;
+    padding:.9rem 1rem;
+    font-size:.85rem;
+  }
+
+  .page-bottom{
+    gap:.7rem;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .book-nav{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    gap:.5rem;
+  }
+
+  .book-nav .book-btn{
+    flex:1;
+  }
+
+  .wall-grid{
+    grid-template-columns:1fr;
+  }
+
+  .wcard{
+    padding:1rem;
+  }
+
+  .result-book{
+    padding:1.2rem;
+  }
+
+  .result-name{
+    font-size:1.2rem;
+  }
+
+  .stat-line{
+    font-size:1.05rem;
+  }
+
+}
+
 </style>
 
 <div class="scanlines"></div>
@@ -162,7 +284,7 @@ body{background:#0c0a08;font-family:'VT323',monospace;min-height:100vh;overflow-
   <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem">
     <button class="ink-btn accent" onclick="goSlam()">✒️ Fill the Book</button>
     <button class="ink-btn" onclick="goConfess()">🌶️ Confess </button>
-    <button class="ink-btn" onclick="goWall()">Archive Access</button>
+    <button class="ink-btn" onclick="goWall()">🔒 Archive Access</button>
   </div>
   <div style="font-family:'VT323',monospace;font-size:.85rem;color:#3d2e1a;margin-top:1.5rem;letter-spacing:2px">private archive protected<br>— written in ink & pixels —</div>
 </div>
