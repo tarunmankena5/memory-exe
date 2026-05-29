@@ -485,9 +485,9 @@ grid-template-columns:1fr !important;
   </div>
   <div class="land-tag">"Before we become strangers<br>with memories."</div>
   <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem">
-    <button class="ink-btn accent" onclick="goSlam()">✒️ Fill the Book</button>
-    <button class="ink-btn" onclick="goConfess()">🌶️ Confess </button>
-    <button class="ink-btn" onclick="goWall()">🔒 Archive Access</button>
+    <button class="ink-btn accent" onclick="goSlam()">✒️ Fill Slam</button>
+    <button class="ink-btn" onclick="goConfess()">🖤 Confess</button>
+    <button class="ink-btn" onclick="goWall()">🔒 Admin</button>
   </div>
   <div style="font-family:'VT323',monospace;font-size:.85rem;color:#3d2e1a;margin-top:1.5rem;letter-spacing:2px">private archive protected<br>— written in ink & pixels —</div>
 </div>
@@ -591,6 +591,18 @@ grid-template-columns:1fr !important;
   </div>
 </div>
 
+
+
+<div class="screen" id="s-admin">
+  <div class="wall-hd">ADMIN.EXE</div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+    <button class="ink-btn" onclick="openMemories()">📖 View Memories</button>
+    <button class="ink-btn" onclick="viewConfessions()">🖤 View Confessions</button>
+    <button class="ink-btn" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="ink-btn accent" onclick="goLand()">🏠 Exit</button>
+  </div>
+  <div id="confession-list" style="width:100%;max-width:650px;margin-top:1rem"></div>
+</div>
 
 </div>
 
@@ -742,16 +754,48 @@ async function submitConfession(){
 
 async function goWall(){
 
-  const pass = prompt("Enter archive key");
+  const pass = prompt("Enter admin password");
 
   if(pass !== "mankena123"){
     alert("Access denied.");
     return;
   }
 
-  show('s-wall');
+  show('s-admin');
+}
 
+
+
+async function openMemories(){
+  show('s-wall');
   await renderWall();
+}
+
+async function viewConfessions(){
+
+  show('s-admin');
+
+  const box = document.getElementById('confession-list');
+  box.innerHTML = '<div style="color:#e8d5a3">Loading confessions...</div>';
+
+  try{
+
+    const snap = await getDocs(
+      query(collection(db,"confessions"), orderBy("ts","desc"))
+    );
+
+    let html = '<div class="wall-hd" style="font-size:1rem">CONFESSIONS</div>';
+
+    snap.forEach(doc=>{
+      const d = doc.data();
+      html += `<div style="background:#1a1208;border:1px solid #3d2e1a;padding:12px;margin:8px 0;color:#e8d5a3;border-radius:8px">${d.text}</div>`;
+    });
+
+    box.innerHTML = html;
+
+  }catch(e){
+    box.innerHTML = '<div style="color:#c8955a">Could not load confessions.</div>';
+  }
 }
 
 
