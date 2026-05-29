@@ -526,12 +526,12 @@ grid-template-columns:1fr !important;
   <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
     <button class="ink-btn accent" onclick="goSlam()">✒️ Add Entry</button>
     <button class="ink-btn" onclick="exportCSV()">⬇ Export CSV</button>
-        <button class="ink-btn" onclick="goLand()">🏠 Home</button>
+        <button class="ink-btn" onclick="show('s-admin')">🔒 Admin</button>
   </div>
 </div>
 
 <div class="screen" id="s-detail">
-  <button class="back-btn" onclick="goWall()">◀ Back</button>
+  <button class="back-btn" onclick="backToWall()">◀ Back</button>
   <div class="detail-page">
     <div class="detail-inner">
       <div class="d-hd">
@@ -1231,6 +1231,11 @@ function exportCSV(){
 }
 
 
+
+
+function backToWall(){
+  show('s-wall');
+}
 
 function showDetail(e){
   document.getElementById('d-av').textContent=e.av;
